@@ -1,1 +1,4 @@
+ibm-platform-services
+ibm-schematics
+ibm-cloud-sdk-core
 requests
