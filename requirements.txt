@@ -1,4 +1,6 @@
 ibm-platform-services
-ibm-schematics
+ibm-continuous-delivery
 ibm-cloud-sdk-core
 requests
+detect-secrets
+pre-commit

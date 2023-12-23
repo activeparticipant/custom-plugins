@@ -1,28 +1,32 @@
-from ibm_cloud_sdk_core import ApiException, read_external_sources
 import os
 import json
-import ibm_cloud_sdk_core
+from ibm_cloud_sdk_core import ApiException, read_external_sources
 from ibm_continuous_delivery.cd_toolchain_v2 import CdToolchainV2
-from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
 
-name = None
-description = None
-resource_group_id = None
+class ToolchainCreator:
 
-def cd_toolchain_create():
+  def __init__(self):
+    self.name = "pipeline-alex"
+    self.description = "this is some test"
+    self.resource_group_id = "c40fa924adbe4a7a9bb978b1f9305dcc"
+    self.cd_toolchain_v2 = CdToolchainV2()
 
-  name = "pipeline-alex"
-  description = "this is some test"
-  resource_group_id = "c40fa924adbe4a7a9bb978b1f9305dcc"
+  def cd_toolchain_create(self):
 
-  response = cd_toolchain_create.create_toolchain(
-      description = description,
-      name = name,
-      resource_group_id = resource_group_id
-  )
+    try:
+      response = self.cd_toolchain_v2.create_toolchain(
+          description = self.description,
+          name = self.name,
+          resource_group_id = self.resource_group_id
+      )
+      toolchain_post = response.get_result()
+      print(json.dumps(toolchain_post, indent=2))
 
-  toolchain_post = response.get_result()
-  print(json.dumps(toolchain_post, indent=2))
+    except ApiException as e:
+            print("Exception when calling CdToolchainV2.create_toolchain: %s\n" % e)
+
 
 if __name__ == '__main__':
-    cd_toolchain_create()
+  toolchain_creator = ToolchainCreator()
+  toolchain_creator.cd_toolchain_create()
+
