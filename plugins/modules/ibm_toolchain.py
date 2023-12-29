@@ -91,7 +91,7 @@ from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
 from ansible.module_utils.basic import AnsibleModule
 
 def run_module():
-  moduleArgs = {
+  module_args = {
     "iam_api_key": {"type": str, "required": True},
     "name": {"type": str, "required": True},
     "resource_group_id": {"type": str, "required": True},
@@ -99,40 +99,52 @@ def run_module():
     "description": {"type": str, "required": False},
     }
 
-  result = {
+  module = AnsibleModule(
+        argument_spec=module_args,
+        supports_check_mode=True
+    )
+  output = {
         'changed': False,
         'original_message':'',
         'message':''
     }
 
-  module = AnsibleModule(argument_spec=moduleArgs, supports_check_mode=False)
+  if module.check_mode:
+     module.exit_json(**output)
+
   result = cd_toolchain_create(module)
   if result["status"] == -1:
-      module.fail_json(msg=result["status_message"], **result)
+      module.fail_json(msg=result["status_message"], **output)
 
-  module.exit_json(**result)
+  module.exit_json(**output)
 
-def cd_toolchain_create(self):
+def cd_toolchain_create(module):
 
-  try:
-    service = self.cd_toolchain_v2
-    service.set_service_url(self.devops_service_url)
+    try:
+        iam_api_key = module.params.get("iam_api_key")
+        name = module.params.get("name")
+        resource_group_id = module.params.get("resource_group_id")
+        devops_service_url = module.params.get("devops_service_url")
+        description = module.params.get("description")
 
+        authenticator = IAMAuthenticator(iam_api_key)
+        service = CdToolchainV2(authenticator=authenticator)
+        service.set_service_url(devops_service_url)
 
-    response = self.cd_toolchain_v2.create_toolchain(
-        description = self.description,
-        name = self.name,
-        resource_group_id = self.resource_group_id
-    )
-    toolchain_post = response.get_result()
-    print(json.dumps(toolchain_post, indent=2))
+        response = service.create_toolchain(
+            description=description,
+            name=name,
+            resource_group_id=resource_group_id
+        )
 
-  except ApiException as e:
-          print("Exception when calling ToolchainCreator.cd_create_toolchain: %s\n" % e)
+        toolchain_post = response.get_result()
+        print(json.dumps(toolchain_post, indent=2))
+        return {"status": 0, "status_message": "Toolchain created successfully."}
 
-def main():
-  run_module()
+    except ApiException as e:
+        error_message = f"Exception when calling cd_toolchain_create: {str(e)}"
+        print(error_message)
+        module.fail_json(msg=error_message, status=-1, status_message="Failed to create the toolchain. Check the parameters and try again.")
 
 if __name__ == '__main__':
-  main()
-
+  run_module()
