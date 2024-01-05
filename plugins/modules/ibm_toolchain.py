@@ -101,10 +101,11 @@ def run_module():
 
   module = AnsibleModule(
         argument_spec=module_args,
-        supports_check_mode=True
+        supports_check_mode=False
     )
+
   output = {
-        'changed': False,
+        'changed':False,
         'original_message':'',
         'message':''
     }
@@ -113,7 +114,7 @@ def run_module():
      module.exit_json(**output)
 
   result = cd_toolchain_create(module)
-  if result["status"] == -1:
+  if result["status"] == 0:
       module.fail_json(msg=result["status_message"], **output)
 
   module.exit_json(**output)
@@ -139,12 +140,12 @@ def cd_toolchain_create(module):
 
         toolchain_post = response.get_result()
         print(json.dumps(toolchain_post, indent=2))
-        return {"status": 0, "status_message": "Toolchain created successfully."}
+        return {"status": 0, "status_message": "Toolchain created successfully here."}
 
     except ApiException as e:
-        error_message = f"Exception when calling cd_toolchain_create: {str(e)}"
-        print(error_message)
-        module.fail_json(msg=error_message, status=-1, status_message="Failed to create the toolchain. Check the parameters and try again.")
+        # error handler if cd_toolchain_create will fail
+        error_message = f"Exception when calling cd_toolchain_create. {str(e)}"
+        module.fail_json(changed=False, msg=error_message)
 
 if __name__ == '__main__':
   run_module()
