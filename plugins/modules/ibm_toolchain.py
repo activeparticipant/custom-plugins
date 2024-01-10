@@ -99,25 +99,25 @@ def run_module():
     "description": {"type": str, "required": False},
     }
 
-  module = AnsibleModule(
-        argument_spec=module_args,
-        supports_check_mode=False
-    )
-
-  output = {
+  result = {
         'changed':False,
         'original_message':'',
         'message':''
     }
 
+  module = AnsibleModule(
+        argument_spec=module_args,
+        supports_check_mode=False
+    )
+
   if module.check_mode:
-     module.exit_json(**output)
+     module.exit_json(**result)
 
   result = cd_toolchain_create(module)
   if result["status"] == 0:
-      module.fail_json(msg=result["status_message"], **output)
+      module.fail_json(msg=result["status_message"], **result)
 
-  module.exit_json(**output)
+  module.exit_json(**result)
 
 def cd_toolchain_create(module):
 
